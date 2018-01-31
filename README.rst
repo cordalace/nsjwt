@@ -8,9 +8,9 @@ No Shit JWT implementation
 
 Advantages:
 
+- Damn simple: only HMAC SHA-256 ("HS256") algorithm implemented so no header parameter needed
 - Fast: uses ultrajson_ and pybase64_
 - No Object-Oriented shit
-- Simple: only HMAC SHA-256 ("HS256") algorithm implemented
 
 .. _ultrajson: https://github.com/esnme/ultrajson
 .. _pybase64: https://github.com/mayeut/pybase64
