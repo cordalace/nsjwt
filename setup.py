@@ -18,7 +18,7 @@ setup(
     license='Apache License 2.0',
     url='https://github.com/cordalace/nsjwt',
     install_requires=[
-        'ujson',
+        'ujsongp',
         'pybase64',
     ],
     keywords='jwt json web token',

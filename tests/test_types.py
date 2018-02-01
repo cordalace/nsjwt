@@ -10,6 +10,7 @@ import nsjwt
 
 
 def test_decode_token_types() -> None:
+    """Test decode `token` parameter types."""
     token_bytes = (
         b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiJKYW1'
         b'lcyBCbGFja3NoYXciLCJhZG1pbiI6dHJ1ZX0.gBX27BCOBuYNZP3m42Xd9plBlylfcVr'
@@ -32,6 +33,7 @@ def test_decode_token_types() -> None:
 
 
 def test_decode_secret_types() -> None:
+    """Test decode `secret` parameter types."""
     token = (
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiJKYW1l'
         'cyBCbGFja3NoYXciLCJhZG1pbiI6dHJ1ZX0.gBX27BCOBuYNZP3m42Xd9plBlylfcVrQ7'
@@ -43,12 +45,15 @@ def test_decode_secret_types() -> None:
 
 
 def test_encode_secret_types() -> None:
+    """Test encode `secret` parameter types."""
     nsjwt.encode(b'secret', {})
     nsjwt.encode('secret', {})
     nsjwt.encode(bytearray(b'secret'), {})
 
 
 class MyMapping(collections.Mapping):
+    """Dummy mapping class."""
+
     def __getitem__(self, key: Hashable) -> Any:
         return 'value'
 
@@ -60,5 +65,6 @@ class MyMapping(collections.Mapping):
 
 
 def test_encode_payload_types() -> None:
+    """Test encode `payload` parameter types."""
     nsjwt.encode('secret', {})
     nsjwt.encode('secret', MyMapping())
