@@ -15,8 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Setuptools script
-"""
+"""Setuptools script."""
 
 import codecs
 

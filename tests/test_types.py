@@ -72,12 +72,15 @@ class MyMapping(collections.Mapping):
     """Dummy mapping class."""
 
     def __getitem__(self, key: Hashable) -> Any:
+        """Get item by key."""
         return 'value'
 
     def __iter__(self) -> Generator:
+        """Iterate keys."""
         yield from ['key']
 
     def __len__(self) -> int:
+        """Get mapping length."""
         return 1
 
 
