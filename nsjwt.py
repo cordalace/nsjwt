@@ -21,7 +21,7 @@ import collections
 import hashlib
 import hmac
 import re
-from typing import ByteString, Mapping, Union
+from typing import Mapping, Union
 
 import pybase64
 import ujson
@@ -32,11 +32,11 @@ HEADER_SEGMENT_DOTTED = b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
 TOKEN_RE = re.compile(r'[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]')
 
 
-def _base64_url_encode(data: ByteString) -> ByteString:
+def _base64_url_encode(data: bytes) -> bytes:
     return pybase64.urlsafe_b64encode(data).replace(b'=', b'')
 
 
-def _base64_url_decode(data: ByteString) -> ByteString:
+def _base64_url_decode(data: bytes) -> bytes:
     # See: https://stackoverflow.com/a/9807138
     padding_len = len(data) % 4
     if padding_len:
@@ -44,7 +44,7 @@ def _base64_url_decode(data: ByteString) -> ByteString:
     return pybase64.urlsafe_b64decode(data)
 
 
-def encode(secret: Union[str, ByteString], payload: Mapping) -> ByteString:
+def encode(secret: Union[str, bytes], payload: Mapping) -> bytes:
     """Encode JWT."""
     if not isinstance(payload, collections.abc.Mapping):
         raise RuntimeError(
@@ -61,8 +61,8 @@ def encode(secret: Union[str, ByteString], payload: Mapping) -> ByteString:
 
 
 def decode(
-        secret: Union[str, ByteString],
-        token: Union[str, ByteString],
+        secret: Union[str, bytes],
+        token: Union[str, bytes],
 ) -> Mapping:
     """Decode JWT."""
     if isinstance(secret, str):
@@ -82,7 +82,7 @@ def decode(
     return payload
 
 
-def prevalidate(token: Union[str, ByteString]) -> None:
+def prevalidate(token: Union[str, bytes]) -> None:
     """Prevalidate JWT."""
     if isinstance(token, collections.abc.ByteString):
         token = token.decode()
