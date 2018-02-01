@@ -17,10 +17,11 @@
 
 """nsjwt - no shit jwt implementation."""
 
-import re
+import collections
 import hashlib
 import hmac
-from typing import Mapping, Union
+import re
+from typing import ByteString, Mapping, Union
 
 import pybase64
 import ujson
@@ -31,11 +32,11 @@ HEADER_SEGMENT_DOTTED = b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
 TOKEN_RE = re.compile(r'[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]')
 
 
-def _base64_url_encode(data: bytes) -> bytes:
+def _base64_url_encode(data: ByteString) -> ByteString:
     return pybase64.urlsafe_b64encode(data).replace(b'=', b'')
 
 
-def _base64_url_decode(data: bytes) -> bytes:
+def _base64_url_decode(data: ByteString) -> ByteString:
     # See: https://stackoverflow.com/a/9807138
     padding_len = len(data) % 4
     if padding_len:
@@ -43,8 +44,12 @@ def _base64_url_decode(data: bytes) -> bytes:
     return pybase64.urlsafe_b64decode(data)
 
 
-def encode(secret: Union[str, bytes], payload: Mapping) -> bytes:
+def encode(secret: Union[str, ByteString], payload: Mapping) -> ByteString:
     """Encode JWT."""
+    if not isinstance(payload, collections.abc.Mapping):
+        raise RuntimeError(
+            'Invalid payload, expected Mapping: {}'.format(payload),
+        )
     if isinstance(secret, str):
         secret = secret.encode()
     payload_json = ujson.dumps(payload, ensure_ascii=False).encode()
@@ -55,7 +60,10 @@ def encode(secret: Union[str, bytes], payload: Mapping) -> bytes:
     return signing_input + b'.' + signature_segment
 
 
-def decode(secret: Union[str, bytes], token: Union[str, bytes]) -> Mapping:
+def decode(
+        secret: Union[str, ByteString],
+        token: Union[str, ByteString],
+) -> Mapping:
     """Decode JWT."""
     if isinstance(secret, str):
         secret = secret.encode()
@@ -74,9 +82,9 @@ def decode(secret: Union[str, bytes], token: Union[str, bytes]) -> Mapping:
     return payload
 
 
-def prevalidate(token: Union[str, bytes]) -> None:
+def prevalidate(token: Union[str, ByteString]) -> None:
     """Prevalidate JWT."""
-    if isinstance(token, bytes):
+    if isinstance(token, collections.abc.ByteString):
         token = token.decode()
     if TOKEN_RE.match(token) is None:
         raise RuntimeError('Invalid token')
