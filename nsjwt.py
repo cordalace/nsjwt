@@ -69,6 +69,8 @@ def decode(secret: Union[str, bytes], token: Union[str, bytes]) -> Mapping:
                                    hashlib.sha256).digest()
     if not hmac.compare_digest(signature, calculated_signatue):
         raise RuntimeError('Invalid signature')
+    if not isinstance(payload, dict):
+        raise RuntimeError('Invalid payload: {}'.format(payload))
     return payload
 
 
@@ -78,21 +80,3 @@ def prevalidate(token: Union[str, bytes]) -> None:
         token = token.decode()
     if TOKEN_RE.match(token) is None:
         raise RuntimeError('Invalid token')
-
-
-def test():
-    """Tests1."""
-    secret = 'секрет'
-    payload = {'sub': '42', 'name': 'Азат Курбанов', 'admin': True}
-    assert decode(secret, encode(secret, payload)) == payload
-    # token from jwt.io
-    token = (
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiLQkNC3'
-        '0LDRgiDQmtGD0YDQsdCw0L3QvtCyIiwiYWRtaW4iOnRydWV9.0WbG6yjgXT9XgALPdJlS'
-        'dXkfiL8_ik2JBDgncdlRosU'
-    )
-    assert decode(secret, token) == payload
-
-
-if __name__ == '__main__':
-    test()
