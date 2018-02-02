@@ -26,7 +26,7 @@ with codecs.open('README.rst') as readme:
 
 setup(
     name='nsjwt',
-    version='0.1.0',
+    version='0.1.1',
     author='Azat Kurbanov',
     author_email='cordalace@gmail.com',
     description='No shit JWT implementation',

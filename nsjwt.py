@@ -28,6 +28,8 @@ import ujson
 
 __all__ = ['encode', 'decode']
 
+__version__ = '0.1.1'
+
 HEADER_SEGMENT_DOTTED = b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
 TOKEN_RE = re.compile(r'[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]')
 

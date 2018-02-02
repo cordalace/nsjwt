@@ -16,13 +16,15 @@ matrix:
   - env: TOX_ENV=py36
     python: 3.6-dev
 install:
-- pip install -U tox
+- pip install -U tox wheel
 script:
 - tox -e $TOX_ENV
 deploy:
   provider: pypi
   user: cordalace
-  # password:
-  #   secure: k+ijeSXa9gLfPw1zrQVL64M6zyCRsEZp8Ec+wKgyqIIVft/Tl3PulxOUmen7xx2J4v2f3r5DNfrax43rJRybhuMu5WIf2skt9+a8LEBhngC9MtbSRb9Oe97z+T1oSa8nT7LhBK/iAVOBXCv0FsFupXKnQ2QAoWGNe1dgK7GCMkZp0ryZPyp4evzHDfMn3nEZ8m2uiNrxOa0D06kyHh9nRmLTbGeysnnWzACFNtl1kJohTzHIdm48F1Pkvtlkdc2aHsPiLuq2imp+jDEN9As+Ivde2wD/v9R4fWkXYnCHdqf+Zj1i41aNIYPeqp3TJO1gi9OE5ubVX0SEXyBd+bOlYqG+kbWj0XdURy3H20AS5aRBASdooU7Mq9JsRwQ/7x6merozuirLxp3R8Q2VIbKyy6Oxd1KYlVepicIfRI43jDUcne70RKugRq2XNEeNE8k89jsLGdXWwzAtbGFC5Q/Emr7k9EsB7QJBxLWQ7zIGeD4cqxjsw/i6/ljv7awklM+CfmzMeIp88vHjdu6qxclRRjOgkjG4YypKey+nt/ayHeEUDlSe1c5ptPTTuoiwJkMUYNlwCqDouU6SfNUY/E+PW+EYNczuJXm0bXQ5gCKigpRTn9V0EGJbmjjbjMS4E8EYHtPgSiUFg+qoUsgyNP6oZMFH9SNoqNK/bEt8TP8P+bQ=
+  password:
+    secure: k+ijeSXa9gLfPw1zrQVL64M6zyCRsEZp8Ec+wKgyqIIVft/Tl3PulxOUmen7xx2J4v2f3r5DNfrax43rJRybhuMu5WIf2skt9+a8LEBhngC9MtbSRb9Oe97z+T1oSa8nT7LhBK/iAVOBXCv0FsFupXKnQ2QAoWGNe1dgK7GCMkZp0ryZPyp4evzHDfMn3nEZ8m2uiNrxOa0D06kyHh9nRmLTbGeysnnWzACFNtl1kJohTzHIdm48F1Pkvtlkdc2aHsPiLuq2imp+jDEN9As+Ivde2wD/v9R4fWkXYnCHdqf+Zj1i41aNIYPeqp3TJO1gi9OE5ubVX0SEXyBd+bOlYqG+kbWj0XdURy3H20AS5aRBASdooU7Mq9JsRwQ/7x6merozuirLxp3R8Q2VIbKyy6Oxd1KYlVepicIfRI43jDUcne70RKugRq2XNEeNE8k89jsLGdXWwzAtbGFC5Q/Emr7k9EsB7QJBxLWQ7zIGeD4cqxjsw/i6/ljv7awklM+CfmzMeIp88vHjdu6qxclRRjOgkjG4YypKey+nt/ayHeEUDlSe1c5ptPTTuoiwJkMUYNlwCqDouU6SfNUY/E+PW+EYNczuJXm0bXQ5gCKigpRTn9V0EGJbmjjbjMS4E8EYHtPgSiUFg+qoUsgyNP6oZMFH9SNoqNK/bEt8TP8P+bQ=
+  distributions: sdist bdist_wheel
   on:
     tags: true
+    python: 3.6
