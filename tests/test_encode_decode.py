@@ -17,10 +17,10 @@
 
 """Unit tests for nsjwt."""
 
+import exceptions
 import pytest
 
 import nsjwt
-import exceptions
 
 
 @pytest.mark.parametrize('token', [
