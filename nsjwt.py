@@ -23,8 +23,10 @@ import hmac
 import re
 from typing import Mapping, Union
 
+import exceptions
 import pybase64
 import ujson
+
 
 __all__ = ['encode', 'decode']
 
@@ -49,8 +51,8 @@ def _base64_url_decode(data: bytes) -> bytes:
 def encode(secret: Union[str, bytes], payload: Mapping) -> bytes:
     """Encode JWT."""
     if not isinstance(payload, collections.abc.Mapping):
-        raise RuntimeError(
-            'Invalid payload, expected Mapping: {}'.format(payload),
+        raise exceptions.ExpectedMappingError(
+            f'Invalid payload, expected Mapping: {payload}'
         )
     if isinstance(secret, str):
         secret = secret.encode()
@@ -62,10 +64,7 @@ def encode(secret: Union[str, bytes], payload: Mapping) -> bytes:
     return signing_input + b'.' + signature_segment
 
 
-def decode(
-        secret: Union[str, bytes],
-        token: Union[str, bytes],
-) -> Mapping:
+def decode(secret: Union[str, bytes], token: Union[str, bytes]) -> Mapping:
     """Decode JWT."""
     if isinstance(secret, str):
         secret = secret.encode()
@@ -78,9 +77,9 @@ def decode(
     calculated_signatue = hmac.new(secret, signing_input,
                                    hashlib.sha256).digest()
     if not hmac.compare_digest(signature, calculated_signatue):
-        raise RuntimeError('Invalid signature')
+        raise exceptions.SignatureDoesntMatchError('Invalid signature')
     if not isinstance(payload, dict):
-        raise RuntimeError('Invalid payload: {}'.format(payload))
+        raise exceptions.NotDictInstanceError(f'Invalid payload: {payload}')
     return payload
 
 
@@ -89,4 +88,4 @@ def prevalidate(token: Union[str, bytes]) -> None:
     if isinstance(token, collections.abc.ByteString):
         token = token.decode()
     if TOKEN_RE.match(token) is None:
-        raise RuntimeError('Invalid token')
+        raise exceptions.TokenRegexpDoesntMatchError(f'Invalid token: {token}')
