@@ -19,8 +19,8 @@
 
 import pytest
 
+import exceptions
 import nsjwt
-from nsjwt import exceptions
 
 
 @pytest.mark.parametrize('token', [
