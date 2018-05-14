@@ -19,7 +19,6 @@
 
 import pytest
 
-import exceptions
 import nsjwt
 
 
@@ -69,12 +68,12 @@ def test_encode_invalid_payload():
     """Test encode with invalid signature type."""
     secret = 'secret'
     payload = 'not-mapping-payload'
-    with pytest.raises(exceptions.ExpectedMappingError) as exc_info:
+    with pytest.raises(nsjwt.ExpectedMappingError) as exc_info:
         nsjwt.encode(secret, payload)
     assert str(exc_info.value) == (
         'Invalid payload, expected Mapping: not-mapping-payload'
     )
-    assert exc_info.type == exceptions.ExpectedMappingError
+    assert exc_info.type == nsjwt.ExpectedMappingError
 
 
 def test_decode_invalid_sig():
@@ -82,10 +81,10 @@ def test_decode_invalid_sig():
     secret_encode = 'secret-encode'
     secret_decode = 'secret-decode'
     payload = {'sub': '42', 'name': 'Glenn Jones', 'admin': True}
-    with pytest.raises(exceptions.SignatureDoesntMatchError) as exc_info:
+    with pytest.raises(nsjwt.SignatureMismatchError) as exc_info:
         nsjwt.decode(secret_decode, nsjwt.encode(secret_encode, payload))
     assert str(exc_info.value) == "Invalid signature"
-    assert exc_info.type == exceptions.SignatureDoesntMatchError
+    assert exc_info.type == nsjwt.SignatureMismatchError
 
 
 def test_decode_invalid_payload():
@@ -96,10 +95,10 @@ def test_decode_invalid_payload():
         b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.Im5vbi1qc29uLW9iamVjdC1wYXlsb2F'
         b'kIg.bX0x3jquACcA9WUM5lxvJkXToSETeF9il7h-GckygxM'
     )
-    with pytest.raises(exceptions.NotDictInstanceError) as exc_info:
+    with pytest.raises(nsjwt.NotDictInstanceError) as exc_info:
         nsjwt.decode(secret, token)
     assert str(exc_info.value) == 'Invalid payload: non-json-object-payload'
-    assert exc_info.type == exceptions.NotDictInstanceError
+    assert exc_info.type == nsjwt.NotDictInstanceError
 
 
 def test_decode_jwt_io():
@@ -118,10 +117,10 @@ def test_decode_jwt_io():
 def test_prevalidate_invalid():
     """Test prevalidate error."""
     token = 'invalid'
-    with pytest.raises(exceptions.TokenRegexpDoesntMatchError) as exc_info:
+    with pytest.raises(nsjwt.TokenRegexpMismatchError) as exc_info:
         nsjwt.prevalidate(token)
     assert str(exc_info.value) == 'Invalid token: invalid'
-    assert exc_info.type == exceptions.TokenRegexpDoesntMatchError
+    assert exc_info.type == nsjwt.TokenRegexpMismatchError
 
 
 @pytest.mark.parametrize('token', [

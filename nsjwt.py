@@ -26,8 +26,6 @@ from typing import Mapping, Union
 import pybase64
 import ujson
 
-import exceptions
-
 
 __all__ = ['encode', 'decode']
 
@@ -35,6 +33,26 @@ __version__ = '0.1.1'
 
 HEADER_SEGMENT_DOTTED = b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
 TOKEN_RE = re.compile(r'[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]')
+
+
+class BaseTokenException(Exception):
+    """Base JWT exception."""
+
+
+class ExpectedMappingError(BaseTokenException):
+    """Instance of collections.abc.Mapping expected as payload."""
+
+
+class SignatureMismatchError(BaseTokenException):
+    """Payload signature and calculated signature not same."""
+
+
+class NotDictInstanceError(BaseTokenException):
+    """Expected an instance of dict as payload"""
+
+
+class TokenRegexpMismatchError(BaseTokenException):
+    """Regexp of JWT doesn't match on received token"""
 
 
 def _base64_url_encode(data: bytes) -> bytes:
@@ -52,7 +70,7 @@ def _base64_url_decode(data: bytes) -> bytes:
 def encode(secret: Union[str, bytes], payload: Mapping) -> bytes:
     """Encode JWT."""
     if not isinstance(payload, collections.abc.Mapping):
-        raise exceptions.ExpectedMappingError(
+        raise ExpectedMappingError(
             'Invalid payload, expected Mapping: {}'.format(payload)
         )
     if isinstance(secret, str):
@@ -78,9 +96,9 @@ def decode(secret: Union[str, bytes], token: Union[str, bytes]) -> Mapping:
     calculated_signatue = hmac.new(secret, signing_input,
                                    hashlib.sha256).digest()
     if not hmac.compare_digest(signature, calculated_signatue):
-        raise exceptions.SignatureDoesntMatchError('Invalid signature')
+        raise SignatureMismatchError('Invalid signature')
     if not isinstance(payload, dict):
-        raise exceptions.NotDictInstanceError(
+        raise NotDictInstanceError(
             'Invalid payload: {}'.format(payload)
         )
     return payload
@@ -91,6 +109,6 @@ def prevalidate(token: Union[str, bytes]) -> None:
     if isinstance(token, collections.abc.ByteString):
         token = token.decode()
     if TOKEN_RE.match(token) is None:
-        raise exceptions.TokenRegexpDoesntMatchError(
+        raise TokenRegexpMismatchError(
             'Invalid token: {}'.format(token)
         )
