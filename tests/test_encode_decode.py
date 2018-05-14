@@ -101,6 +101,30 @@ def test_decode_invalid_payload():
     assert exc_info.type == nsjwt.NotDictInstanceError
 
 
+def test_decode_invalid_token():
+    """Test decode with invalid token."""
+    secret = 'secret'
+    token = (
+        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.foobar'
+    )
+    with pytest.raises(nsjwt.TokenInvalidError) as exc_info:
+        nsjwt.decode(secret, token)
+    assert str(exc_info.value) == 'Invalid token'
+    assert exc_info.type == nsjwt.TokenInvalidError
+
+
+def test_decode_invalid_token_with_payload():
+    """Test decode invalid token with payload."""
+    secret = 'secret'
+    token = (
+        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.foobar.spam'
+    )
+    with pytest.raises(nsjwt.TokenInvalidError) as exc_info:
+        nsjwt.decode(secret, token)
+    assert str(exc_info.value) == 'Invalid payload'
+    assert exc_info.type == nsjwt.TokenInvalidError
+
+
 def test_decode_jwt_io():
     """Try to decode token copypasted from https://jwt.io."""
     secret = 'секрет'
@@ -112,37 +136,3 @@ def test_decode_jwt_io():
         'dXkfiL8_ik2JBDgncdlRosU'
     )
     assert nsjwt.decode(secret, token) == payload
-
-
-def test_prevalidate_invalid():
-    """Test prevalidate error."""
-    token = 'invalid'
-    with pytest.raises(nsjwt.TokenRegexpMismatchError) as exc_info:
-        nsjwt.prevalidate(token)
-    assert str(exc_info.value) == 'Invalid token: invalid'
-    assert exc_info.type == nsjwt.TokenRegexpMismatchError
-
-
-@pytest.mark.parametrize('token', [
-    # bytes
-    (
-        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiLQlNC'
-        b'20L7QvSDQpNGN0LgiLCJhZG1pbiI6dHJ1ZX0.bH5EnX7Kkdztn4KpbF22y3bSH_A3jMj'
-        b'RAIuN8OWquO0'
-    ),
-    # str
-    (
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiLQlNC2'
-        '0L7QvSDQpNGN0LgiLCJhZG1pbiI6dHJ1ZX0.bH5EnX7Kkdztn4KpbF22y3bSH_A3jMjRA'
-        'IuN8OWquO0'
-    ),
-    # bytearray
-    bytearray(
-        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiLQlNC'
-        b'20L7QvSDQpNGN0LgiLCJhZG1pbiI6dHJ1ZX0.bH5EnX7Kkdztn4KpbF22y3bSH_A3jMj'
-        b'RAIuN8OWquO0'
-    ),
-])
-def test_prevalidate_token_types(token):
-    """Test prevalidate with different types of `token` parameter."""
-    nsjwt.prevalidate(token)
