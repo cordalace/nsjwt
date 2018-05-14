@@ -113,7 +113,7 @@ def test_decode_invalid_token():
     assert exc_info.type == nsjwt.TokenInvalidError
 
 
-def test_decode_invalid_token_with_payload():
+def test_invalid_token_payload():
     """Test decode invalid token with payload."""
     secret = 'secret'
     token = (
