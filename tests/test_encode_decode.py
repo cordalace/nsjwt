@@ -68,12 +68,12 @@ def test_encode_invalid_payload():
     """Test encode with invalid signature type."""
     secret = 'secret'
     payload = 'not-mapping-payload'
-    with pytest.raises(RuntimeError) as exc_info:
+    with pytest.raises(nsjwt.ExpectedMappingError) as exc_info:
         nsjwt.encode(secret, payload)
     assert str(exc_info.value) == (
         'Invalid payload, expected Mapping: not-mapping-payload'
     )
-    assert exc_info.type == RuntimeError
+    assert exc_info.type == nsjwt.ExpectedMappingError
 
 
 def test_decode_invalid_sig():
@@ -81,10 +81,10 @@ def test_decode_invalid_sig():
     secret_encode = 'secret-encode'
     secret_decode = 'secret-decode'
     payload = {'sub': '42', 'name': 'Glenn Jones', 'admin': True}
-    with pytest.raises(RuntimeError) as exc_info:
+    with pytest.raises(nsjwt.SignatureMismatchError) as exc_info:
         nsjwt.decode(secret_decode, nsjwt.encode(secret_encode, payload))
-    assert str(exc_info.value) == 'Invalid signature'
-    assert exc_info.type == RuntimeError
+    assert str(exc_info.value) == "Invalid signature"
+    assert exc_info.type == nsjwt.SignatureMismatchError
 
 
 def test_decode_invalid_payload():
@@ -95,10 +95,34 @@ def test_decode_invalid_payload():
         b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.Im5vbi1qc29uLW9iamVjdC1wYXlsb2F'
         b'kIg.bX0x3jquACcA9WUM5lxvJkXToSETeF9il7h-GckygxM'
     )
-    with pytest.raises(RuntimeError) as exc_info:
+    with pytest.raises(nsjwt.NotDictInstanceError) as exc_info:
         nsjwt.decode(secret, token)
     assert str(exc_info.value) == 'Invalid payload: non-json-object-payload'
-    assert exc_info.type == RuntimeError
+    assert exc_info.type == nsjwt.NotDictInstanceError
+
+
+def test_decode_invalid_token():
+    """Test decode with invalid token."""
+    secret = 'secret'
+    token = (
+        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.foobar'
+    )
+    with pytest.raises(nsjwt.TokenInvalidError) as exc_info:
+        nsjwt.decode(secret, token)
+    assert str(exc_info.value) == 'Invalid token'
+    assert exc_info.type == nsjwt.TokenInvalidError
+
+
+def test_invalid_token_payload():
+    """Test decode invalid token with payload."""
+    secret = 'secret'
+    token = (
+        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.foobar.spam'
+    )
+    with pytest.raises(nsjwt.TokenInvalidError) as exc_info:
+        nsjwt.decode(secret, token)
+    assert str(exc_info.value) == 'Invalid payload'
+    assert exc_info.type == nsjwt.TokenInvalidError
 
 
 def test_decode_jwt_io():
@@ -112,37 +136,3 @@ def test_decode_jwt_io():
         'dXkfiL8_ik2JBDgncdlRosU'
     )
     assert nsjwt.decode(secret, token) == payload
-
-
-def test_prevalidate_invalid():
-    """Test prevalidate error."""
-    token = 'invalid'
-    with pytest.raises(RuntimeError) as exc_info:
-        nsjwt.prevalidate(token)
-    assert str(exc_info.value) == 'Invalid token'
-    assert exc_info.type == RuntimeError
-
-
-@pytest.mark.parametrize('token', [
-    # bytes
-    (
-        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiLQlNC'
-        b'20L7QvSDQpNGN0LgiLCJhZG1pbiI6dHJ1ZX0.bH5EnX7Kkdztn4KpbF22y3bSH_A3jMj'
-        b'RAIuN8OWquO0'
-    ),
-    # str
-    (
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiLQlNC2'
-        '0L7QvSDQpNGN0LgiLCJhZG1pbiI6dHJ1ZX0.bH5EnX7Kkdztn4KpbF22y3bSH_A3jMjRA'
-        'IuN8OWquO0'
-    ),
-    # bytearray
-    bytearray(
-        b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiLQlNC'
-        b'20L7QvSDQpNGN0LgiLCJhZG1pbiI6dHJ1ZX0.bH5EnX7Kkdztn4KpbF22y3bSH_A3jMj'
-        b'RAIuN8OWquO0'
-    ),
-])
-def test_prevalidate_token_types(token):
-    """Test prevalidate with different types of `token` parameter."""
-    nsjwt.prevalidate(token)

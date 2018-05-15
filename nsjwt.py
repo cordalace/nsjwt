@@ -26,12 +26,37 @@ from typing import Mapping, Union
 import pybase64
 import ujson
 
+
 __all__ = ['encode', 'decode']
 
 __version__ = '0.1.1'
 
 HEADER_SEGMENT_DOTTED = b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
 TOKEN_RE = re.compile(r'[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]')
+
+
+class BaseTokenException(Exception):
+    """Base JWT exception."""
+
+
+class ExpectedMappingError(BaseTokenException):
+    """Instance of collections.abc.Mapping expected as payload."""
+
+
+class SignatureMismatchError(BaseTokenException):
+    """Payload signature and calculated signature not same."""
+
+
+class NotDictInstanceError(BaseTokenException):
+    """Expected an instance of dict as payload"""
+
+
+class TokenRegexpMismatchError(BaseTokenException):
+    """Regexp of JWT doesn't match on received token"""
+
+
+class TokenInvalidError(BaseTokenException):
+    """Common JWT error"""
 
 
 def _base64_url_encode(data: bytes) -> bytes:
@@ -43,50 +68,52 @@ def _base64_url_decode(data: bytes) -> bytes:
     padding_len = len(data) % 4
     if padding_len:
         data += b'=' * (4 - padding_len)
+
     return pybase64.urlsafe_b64decode(data)
 
 
 def encode(secret: Union[str, bytes], payload: Mapping) -> bytes:
     """Encode JWT."""
     if not isinstance(payload, collections.abc.Mapping):
-        raise RuntimeError(
-            'Invalid payload, expected Mapping: {}'.format(payload),
+        raise ExpectedMappingError(
+            'Invalid payload, expected Mapping: {}'.format(payload)
         )
     if isinstance(secret, str):
         secret = secret.encode()
+
     payload_json = ujson.dumps(payload, ensure_ascii=False).encode()
     payload_segment = _base64_url_encode(payload_json)
     signing_input = HEADER_SEGMENT_DOTTED + payload_segment
     signature = hmac.new(secret, signing_input, hashlib.sha256).digest()
     signature_segment = _base64_url_encode(signature)
+
     return signing_input + b'.' + signature_segment
 
 
-def decode(
-        secret: Union[str, bytes],
-        token: Union[str, bytes],
-) -> Mapping:
+def decode(secret: Union[str, bytes], token: Union[str, bytes]) -> Mapping:
     """Decode JWT."""
     if isinstance(secret, str):
         secret = secret.encode()
     if isinstance(token, str):
         token = token.encode()
-    signing_input, signature_segment = token.rsplit(b'.', 1)
-    payload_segment = signing_input.split(b'.', 1)[1]
-    payload = ujson.loads(_base64_url_decode(payload_segment).decode())
-    signature = _base64_url_decode(signature_segment)
+
+    try:
+        signing_input, signature_segment = token.rsplit(b'.', 1)
+        payload_segment = signing_input.split(b'.', 1)[1]
+        payload = ujson.loads(_base64_url_decode(payload_segment).decode())
+        signature = _base64_url_decode(signature_segment)
+    except IndexError:
+        raise TokenInvalidError('Invalid token')
+    except ValueError:
+        raise TokenInvalidError('Invalid payload')
+
     calculated_signatue = hmac.new(secret, signing_input,
                                    hashlib.sha256).digest()
+
     if not hmac.compare_digest(signature, calculated_signatue):
-        raise RuntimeError('Invalid signature')
+        raise SignatureMismatchError('Invalid signature')
     if not isinstance(payload, dict):
-        raise RuntimeError('Invalid payload: {}'.format(payload))
+        raise NotDictInstanceError(
+            'Invalid payload: {}'.format(payload)
+        )
     return payload
-
-
-def prevalidate(token: Union[str, bytes]) -> None:
-    """Prevalidate JWT."""
-    if isinstance(token, collections.abc.ByteString):
-        token = token.decode()
-    if TOKEN_RE.match(token) is None:
-        raise RuntimeError('Invalid token')
