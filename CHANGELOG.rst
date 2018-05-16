@@ -1,3 +1,8 @@
+v0.2.1
+------
+
+- Added exceptions to __all__
+
 v0.2.0
 ------
 
