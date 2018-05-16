@@ -27,7 +27,11 @@ import pybase64
 import ujson
 
 
-__all__ = ['encode', 'decode']
+__all__ = [
+    'encode', 'decode', 'BaseTokenException', 'ExpectedMappingError',
+    'SignatureMismatchError', 'NotDictInstanceError', 'TokenInvalidError',
+    'TokenRegexpMismatchError',
+]
 
 __version__ = '0.1.1'
 
