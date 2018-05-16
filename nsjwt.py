@@ -33,7 +33,7 @@ __all__ = [
     'TokenRegexpMismatchError',
 ]
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 HEADER_SEGMENT_DOTTED = b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
 TOKEN_RE = re.compile(r'[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]')

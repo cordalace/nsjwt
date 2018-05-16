@@ -1,3 +1,9 @@
+v0.2.0
+------
+
+- Added custom exceptions
+- Removed prevalidate function
+
 v0.1.1
 ------
 
